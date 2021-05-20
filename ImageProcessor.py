@@ -2,10 +2,11 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 # For Google Colab we use the cv2_imshow() function
-from google.colab.patches import cv2_imshow
+#from google.colab.patches import cv2_imshow
 import random
 import math
 import copy
+import numpy
 
 def Dist(i, j, clus_pt):
     return math.sqrt(pow(i - clus_pt[0], 2) + pow(j - clus_pt[1], 2))
@@ -19,7 +20,7 @@ def FindClusterToJoin(i, j, img, dist, clus_pts):
     indices = []
     counter = 0
     for clus_pt in clus_pts:
-        if Dist(i, j, clus_pt) < dist and ColorDiff(img[i - 1, j - 1], img[clus_pt[0] - 1, clus_pt[1] - 1]):
+        if Dist(i, j, clus_pt) < dist:
             indices.append(counter)
             counter = counter + 1
     Height, Width, c = img.shape
@@ -63,7 +64,11 @@ ClusterMap = []
 #For each point, look for closest cluster Points
 for i in range(Width):
     for j in range(Height):
-        ClusterMap.append(FindClusterToJoin(i - 1, j - 1, img, (Height * Width) / NumClusters, ClusterPointsCoords))
+        ClusterIndex = FindClusterToJoin(i - 1, j - 1, img, (Height * Width) * 10 / NumClusters, ClusterPointsCoords)
+        ClusterLists[ClusterIndex].append((j, i))
+        ClusterMap.append(ClusterIndex)
+
+
 
 #for each cluster, find the average COLOR
 ClusterColors = []
@@ -79,8 +84,6 @@ for ClusterList in ClusterLists:
         total_r += r
         count += 1
     ClusterColors.append(((total_b) / float(count), ((total_g) / float(count)), ((total_r) / float(count))))
-
-print(ClusterColors)
 
 #Sort clusters by color
 for i in range(Width):
